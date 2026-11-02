@@ -109,7 +109,7 @@ sslmode=require, y prueba la conexión con un script de Node de una línea que u
 
 ## 4 · Servidor en Render
 
-1. En **[dashboard.render.com](https://dashboard.render.com/)**: **New → Blueprint** y conecta tu fork de GitHub.
+1. En **[dashboard.render.com](https://dashboard.render.com/)**: menú **Blueprints → New Blueprint Instance** (o **New → Blueprint**) y conecta tu fork de GitHub.
 2. Render lee `render.yaml` y crea el servicio `setter-ai`. `WEBHOOK_VERIFY_TOKEN` y `TOKEN_ENCRYPTION_KEY` se generan solos.
 3. Rellena las variables que te pide (las demás las completarás en el paso 6): `DATABASE_URL` (Neon) y `ADMIN_PASSWORD`.
 4. Espera al despliegue y abre `https://TU-SERVICIO.onrender.com/healthz` → `{"ok":true}`.
@@ -131,16 +131,18 @@ Si falla, dime qué mirar en los logs de Render.
 
 Aquí creas la “app” que da permiso a tu servidor para leer comentarios y mandar mensajes de **tu** cuenta. Sigue la guía oficial **[Instagram API con inicio de sesión de Instagram](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/)**:
 
-1. **[developers.facebook.com/apps](https://developers.facebook.com/apps)** → **Crear app**, con el caso de uso de **Instagram** (gestionar mensajes y contenido).
-2. En el producto **Instagram → configuración de la API con inicio de sesión de Instagram**:
-   - Copia el **ID de la app de Instagram** → `INSTAGRAM_APP_ID`.
-   - Copia la **clave secreta de la app de Instagram** → `META_APP_SECRET`.
-   - **Añade tu cuenta de Instagram** y **genera el token de acceso** → `IG_ACCESS_TOKEN`.
-3. **Webhooks**: URL de devolución `https://TU-SERVICIO.onrender.com/webhooks/instagram` y como token de verificación el valor de `WEBHOOK_VERIFY_TOKEN` de Render. Suscríbete a los campos de comentarios y mensajes.
-4. Permisos que usa la app: `instagram_business_basic`, `instagram_business_manage_messages`, `instagram_business_manage_comments`.
+1. **[developers.facebook.com/apps](https://developers.facebook.com/apps)** → **Crear app**, con el caso de uso **“Administrar mensajes y contenido en Instagram”**.
+2. En ese caso de uso, menú de la izquierda → **“Configuración de la API con el inicio de sesión de Instagram”**:
+   - **Identificador de la aplicación de Instagram** → `INSTAGRAM_APP_ID`.
+   - **Clave secreta de la aplicación de Instagram** (botón *Mostrar*) → `META_APP_SECRET`.
+   - Paso **“1. Añade los permisos de mensajes necesarios”**: `instagram_business_basic`, `instagram_business_manage_comments`, `instagram_business_manage_messages`.
+   - Paso **“2. Genera identificadores de acceso”**: añade tu cuenta de Instagram y genera el token → `IG_ACCESS_TOKEN`.
+   - Paso **“3. Configura los webhooks”**: URL de devolución `https://TU-SERVICIO.onrender.com/webhooks/instagram` y como token de verificación el valor de `WEBHOOK_VERIFY_TOKEN` de Render. Suscríbete a los campos de comentarios y mensajes.
 
-<img src="img/meta-instagram-api.png" alt="Meta: configuración de la API de Instagram (datos ocultos)" width="700">
-<img src="img/meta-webhooks.png" alt="Meta: configuración de webhooks" width="700">
+<img src="img/meta-instagram-api.png" alt="Meta: identificador y clave secreta de la app de Instagram (ocultos) y paso 1 de permisos" width="700">
+<img src="img/meta-pasos.png" alt="Meta: pasos 2 a 5 (identificadores de acceso, webhooks, inicio de sesión y revisión)" width="700">
+
+> ⚠️ **Aviso de Meta (visto en noviembre de 2026):** el panel recomienda la configuración con *inicio de sesión unificado* y marca la de *inicio de sesión con Instagram* (la que usa este proyecto) como **heredada**, aunque sigue funcionando. Si Meta la retirara, habría que adaptar `src/instagram-connect.ts` y `src/meta/client.ts`.
 
 > 🔒 Si tu cuenta de Instagram tiene un rol en la app (administrador o evaluador), no necesitas pasar la revisión de Meta para usarla con **tu propia** cuenta.
 
@@ -224,6 +226,7 @@ sepa, márcalo como [COMPLETAR].
 3. Desde **otra** cuenta de Instagram, comenta en uno de tus reels.
 4. Mira **Conversaciones**, **Contactos** y **Configuración → Registro**.
 
+<img src="img/app-flujos.png" alt="Lista de flujos con el botón Crear flujo" width="700">
 <img src="img/app-constructor.png" alt="Constructor de flujos" width="700">
 
 **🤖 Prompt para Claude Code**

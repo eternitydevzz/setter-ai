@@ -175,6 +175,7 @@ npm run build      # compila todo (lo que hace Render)
 
 ## ⚠️ Límites conocidos
 
+- **Meta puede cambiar la API**: en noviembre de 2026 el panel de Meta marca la configuración “con inicio de sesión de Instagram” (la que usa este proyecto) como heredada, aunque funciona. Si la retiran, habría que adaptar `src/instagram-connect.ts` y `src/meta/client.ts`.
 - **Solo español**: el marco técnico del setter contesta siempre en español (lo puedes cambiar en *Setter IA → Marco técnico*).
 - **Meta decide**: a algunas personas Instagram no deja mandarles el DM del comentario (error 2534025); para eso está el *plan B*. Si hay muchos rechazos, Meta puede restringir la cuenta.
 - **Límite de intentos de login detrás de un proxy**: se usa la última IP de `X-Forwarded-For`, la que añade el proxy de Render. Si despliegas en otro sitio, revisa `clientIp` en `src/routes-api.ts`.
