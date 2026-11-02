@@ -1,0 +1,149 @@
+@import 'tailwindcss';
+
+/*
+ * Estilo de la referencia de diseño (panel Better Angles, leído de su CSS el 2026-10-17): tema oscuro, acento dorado,
+ * Gabarito para títulos y menú, Inter para el texto. Se copia el estilo, no la marca.
+ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Gabarito', system-ui, -apple-system, sans-serif;
+
+  --color-base: #0a0a0a;
+  --color-g1: #111113;
+  --color-g2: #161618;
+  --color-g3: #1c1c1f;
+  --color-g4: #232327;
+  --color-g5: #2d2d32;
+  /* Fase 7.1: antes #6c6c72 (3,3-3,8:1, no llegaba al 4,5:1). Medido: ≥4,63:1 sobre todas las capas. */
+  --color-smoke: #8b8b92;
+  --color-ash: #97979e;
+  --color-mist: #c6c6cc;
+  --color-fog: #e9e9ec;
+  --color-snow: #fbfbfc;
+
+  --color-ember-50: #fbf3dc;
+  --color-ember-200: #ebd081;
+  --color-ember-300: #e0bc55;
+  --color-ember-400: #d9ae3e;
+  --color-ember-500: #d4a53a;
+  --color-ember-600: #b98c2c;
+  --color-ember-700: #8f6b1e;
+
+  --color-ok: #2ed38a;
+  --color-bad: #ff5c6a;
+  --color-warn: #f0b23e;
+  --color-info: #5ab0f5;
+  --color-violet: #b79cff;
+
+  /*
+   * Etapas del lead (Fase 8). Validado con el validador de la skill dataviz sobre #161618, en el orden de las columnas
+   * del tablero: pasa luminosidad, croma, daltonismo y visión normal entre vecinas; entre todas las parejas falla
+   * aguamarina↔magenta para daltonismo verde → por eso cada etapa va SIEMPRE con icono y texto, nunca solo color.
+   */
+  --color-stage-qualify: #3987e5;
+  --color-stage-book: #199e70;
+  --color-stage-member: #c98500;
+  --color-stage-human: #d55181;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  /* Barras de desplazamiento, casillas y desplegables del navegador también en oscuro. */
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--color-base);
+    color: var(--color-fog);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Foco visible siempre con teclado (sistema de diseño §2): anillo dorado de 2 px separado 2 px. */
+  :focus-visible {
+    outline: 2px solid var(--color-ember-400);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  a,
+  [role='button'],
+  summary,
+  select {
+    cursor: pointer;
+  }
+  /* "Reducir movimiento" del sistema: sin animaciones ni transiciones. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Etiqueta de sección: MAYÚSCULAS pequeñas y espaciadas ("SALUD DEL NEGOCIO"). */
+  .label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-smoke);
+  }
+  /* Tarjeta: degradado muy sutil y borde fino. */
+  .card {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008));
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 16px;
+  }
+  .btn-gold {
+    background: linear-gradient(180deg, #dcae43, #d0a035);
+    color: #1a1406;
+    font-weight: 700;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(212, 165, 58, 0.18);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+  .btn-gold:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(212, 165, 58, 0.26);
+  }
+  .btn-gold:disabled {
+    opacity: 0.5;
+  }
+  .field {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--color-fog);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+  }
+  .field::placeholder {
+    color: var(--color-smoke);
+  }
+  .field:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  /* En el móvil, 16 px: así el iPhone no hace zoom al tocar el campo. */
+  @media (max-width: 640px) {
+    .field {
+      font-size: 16px;
+    }
+  }
+  .field:focus {
+    border-color: rgba(212, 165, 58, 0.5);
+    box-shadow: 0 0 0 3px rgba(212, 165, 58, 0.12);
+  }
+}
