@@ -45,8 +45,8 @@ describe('checkReply', () => {
     expect(!link.ok && link.reasons.join(' ')).toContain('Enlace no permitido');
   });
 
-  it('bloquea los precios del grupal y del VIP en cualquier formato, pero no los 47 $ ni otras cifras', () => {
-    for (const text of ['son $1.997', 'el VIP 4997 dólares', 'cuesta 4,997', '1 997 €']) expect(checkReply(text, allowed).ok).toBe(false);
+  it('no bloquea cifras ni precios: qué precio se da por chat lo decide el documento', () => {
+    for (const text of ['son $1.997', 'cuesta 4,997', '1 997 €']) expect(checkReply(text, allowed).ok).toBe(true);
     for (const text of ['desde $47 al mes', 'un dashboard de $3.000', '64 repositorios', '19970']) expect(checkReply(text, allowed).ok).toBe(true);
   });
 

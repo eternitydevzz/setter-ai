@@ -126,7 +126,7 @@ function Creator({ onCreate }: { onCreate: (name: string, template: TemplateId) 
     >
       <label className="block">
         <span className="mb-1.5 block text-xs font-semibold text-mist">Nombre del flujo</span>
-        <input className="field" maxLength={80} placeholder="Ej.: Guía n8n por comentario" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+        <input className="field" maxLength={80} placeholder="Ej.: Guía gratis por comentario" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </label>
       <fieldset>
         <legend className="mb-1.5 text-xs font-semibold text-mist">Empezar desde</legend>

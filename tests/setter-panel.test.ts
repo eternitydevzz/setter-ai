@@ -108,7 +108,7 @@ describe('panel /conversaciones', () => {
     await ctx.store.touchContact(STRANGER_ID, 'tester_ig');
     await ctx.store.addMessage({ igId: STRANGER_ID, direction: 'in', source: 'user', text: 'hola <script>alert(1)</script>', mid: 'm-1', status: 'sent', dedupKey: null });
     await ctx.store.addMessage({ igId: STRANGER_ID, direction: 'out', source: 'ai', text: 'Paga en https://otro.com', mid: null, status: 'held', dedupKey: 'ai:m-1', note: 'Enlace no permitido' });
-    await ctx.store.saveLead(STRANGER_ID, sampleOutput({}, { siguiente_paso: 'agendar_llamada', usa_ia: 'ChatGPT para textos' }).lead);
+    await ctx.store.saveLead(STRANGER_ID, sampleOutput({}, { siguiente_paso: 'agendar_llamada', dedicacion: 'Tienda de velas' }).lead);
     return ctx;
   }
 
@@ -122,7 +122,7 @@ describe('panel /conversaciones', () => {
 
   it('la conversación enseña el historial de la ficha (cada cambio, con su etapa y fecha)', async () => {
     const ctx = await withConversation();
-    await ctx.store.saveLead(STRANGER_ID, sampleOutput({}, { siguiente_paso: 'ofrecer_membresia', usa_ia: 'ChatGPT para textos' }).lead);
+    await ctx.store.saveLead(STRANGER_ID, sampleOutput({}, { siguiente_paso: 'ofrecer_membresia', dedicacion: 'Tienda de velas' }).lead);
     const page = await (await ctx.get(`/conversaciones/${STRANGER_ID}`)).text();
     expect(page).toContain('Historial de la ficha');
     const history = page.slice(page.indexOf('Historial de la ficha'));
@@ -137,7 +137,7 @@ describe('panel /conversaciones', () => {
     expect(page).not.toContain('<script>alert(1)</script>');
     expect(page).toContain('RETENIDO (no enviado)');
     expect(page).toContain('Enlace no permitido');
-    expect(page).toContain('ChatGPT para textos');
+    expect(page).toContain('Tienda de velas');
   });
 
   it('parar y reanudar la IA en una conversación', async () => {

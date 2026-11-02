@@ -100,17 +100,17 @@ describe('scrubPerson (BORRAR también limpia los análisis guardados)', () => {
 describe('reelTraffic (sin IA)', () => {
   it('suma las fichas por reel de origen (sin contar "desconocido")', () => {
     const traffic = reelTraffic([
-      { sourceMediaId: 'r1', lead: { tipo_lead: 'empresa_dfy', nivel: 'nivel_1', puede_invertir: 'si', siguiente_paso: 'agendar_llamada' } },
-      { sourceMediaId: 'r1', lead: { tipo_lead: 'formacion', nivel: 'desconocido', puede_invertir: 'duda', siguiente_paso: 'seguir_calificando' } },
+      { sourceMediaId: 'r1', lead: { tipo_lead: 'empresa', nivel: 'nivel_1', puede_invertir: 'si', siguiente_paso: 'agendar_llamada' } },
+      { sourceMediaId: 'r1', lead: { tipo_lead: 'aprender', nivel: 'desconocido', puede_invertir: 'duda', siguiente_paso: 'seguir_calificando' } },
       { sourceMediaId: 'r1', lead: null },
-      { sourceMediaId: null, lead: { tipo_lead: 'formacion' } },
+      { sourceMediaId: null, lead: { tipo_lead: 'aprender' } },
     ]);
     expect(traffic).toEqual([
       {
         mediaId: 'r1',
         people: 3,
         withLead: 2,
-        tipo: { empresa_dfy: 1, formacion: 1 },
+        tipo: { empresa: 1, aprender: 1 },
         nivel: { nivel_1: 1 },
         invertir: { si: 1, duda: 1 },
         paso: { agendar_llamada: 1, seguir_calificando: 1 },

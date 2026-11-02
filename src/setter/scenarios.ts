@@ -4,6 +4,7 @@ import type { Lead } from './schema.js';
 /**
  * Escenarios del simulador: un perfil para la IA que hace de lead y lo que debería pasar.
  * `expectStep` / `expectStop` se comprueban solos; `check` es lo que el administrador debe mirar a ojo.
+ * Están pensados para el negocio de ejemplo (ejemplos/documento-setter.md): cámbialos para tu negocio.
  */
 
 export type ScenarioGroup = 'Inicio' | 'Calificación' | 'Objeciones' | 'Casos delicados' | 'Fuera de tema';
@@ -23,30 +24,30 @@ export interface Scenario {
   readonly opener?: string;
 }
 
-/** Los 5 textos de inicio aprobados por el administrador (2026-10-17). */
+/** Textos de inicio de ejemplo. */
 const OPENERS = [
-  'oye! espero que te sirva la biblioteca 🙌 por curiosidad, ¿a qué te dedicas ahora mismo?',
-  'ey! ¿pudiste echarle un vistazo a la biblioteca? me da curiosidad, ¿ya estás usando la IA para algo?',
-  'buenas! ya tienes todo en la biblioteca 😊 cuéntame, ¿qué te gustaría conseguir con la IA?',
-  'hola! gracias por comentar 🙏 ¿ya estás metido en algo con IA o te está empezando a interesar?',
-  'qué tal! vi que te interesó el recurso, ¿lo quieres para tu negocio o para empezar algo nuevo?',
+  'oye! espero que te sirva la guía 🙌 por curiosidad, ¿a qué te dedicas ahora mismo?',
+  'ey! ¿pudiste echarle un vistazo a la guía? me da curiosidad, ¿ya haces fotos de producto?',
+  'buenas! ya tienes la guía 😊 cuéntame, ¿qué te gustaría conseguir con tus fotos?',
+  'hola! gracias por comentar 🙏 ¿las fotos son para tu tienda o te interesa dedicarte a esto?',
+  'qué tal! vi que te interesó la guía, ¿la quieres para tu negocio o para empezar algo nuevo?',
 ] as const;
-const AFTER_RESOURCE = 'Comentaste en un reel de la cuenta, pulsaste el botón y te llegó su biblioteca de recursos. Ahora la cuenta te escribe primero.';
+const AFTER_RESOURCE = 'Comentaste en un reel de la cuenta, pulsaste el botón y te llegó su guía gratis de fotografía de producto. Ahora la cuenta te escribe primero.';
 
 export const SCENARIOS: readonly Scenario[] = [
   {
     id: 'inicio-negocio',
     group: 'Inicio',
-    title: 'Tiene un negocio pequeño',
-    persona: `${AFTER_RESOURCE} Tienes una peluquería en Ciudad de México con 3 empleadas. Quieres usar la IA para conseguir más clientes y ahorrar tiempo con las citas. Respondes con ganas pero cortito.`,
+    title: 'Tiene una tienda online pequeña',
+    persona: `${AFTER_RESOURCE} Tienes una tienda online de velas artesanales en Bogotá. Haces las fotos con el móvil y no te convencen. Quieres vender más. Respondes con ganas pero cortito.`,
     opener: OPENERS[0],
-    check: 'Se interesa por la peluquería (cómo le va, qué le gustaría mejorar) antes de hablar del programa; una pregunta por mensaje.',
+    check: 'Se interesa por la tienda (cómo le va, qué le gustaría mejorar) antes de hablar del programa; una pregunta por mensaje.',
   },
   {
     id: 'inicio-curioso',
     group: 'Inicio',
     title: 'Curioso, sin negocio',
-    persona: `${AFTER_RESOURCE} Tienes 24 años, trabajas en un call center en Colombia. Ves que la IA es el futuro pero no sabes por dónde empezar. Usas ChatGPT a veces para la universidad.`,
+    persona: `${AFTER_RESOURCE} Tienes 24 años, trabajas en una tienda de ropa en Lima. Te gusta la fotografía y te gustaría ganar algo extra con ella, pero no sabes por dónde empezar.`,
     opener: OPENERS[1],
     check: 'Conversación cercana: reacciona a lo que cuenta y descubre su situación y su objetivo sin parecer un formulario.',
   },
@@ -69,17 +70,17 @@ export const SCENARIOS: readonly Scenario[] = [
   {
     id: 'inicio-nivel2',
     group: 'Inicio',
-    title: 'Nivel 2: ya vende servicios',
-    persona: `${AFTER_RESOURCE} Vives en Texas, usas Claude Code a diario, has vendido 2 webs con IA a negocios pero estás estancado y quieres escalar. Tienes ahorros. Si te proponen una llamada, aceptas.`,
+    title: 'Nivel 2: ya cobra por fotos',
+    persona: `${AFTER_RESOURCE} Ya haces fotos de producto para 3 marcas pequeñas, pero cobras poco y no sabes conseguir clientes mejores. Tienes ahorros. Si te proponen una llamada, aceptas.`,
     opener: OPENERS[4],
-    check: 'Detecta nivel 2, profundiza (qué vendió, qué le frena) y propone la llamada en el momento adecuado.',
+    check: 'Detecta nivel 2, profundiza (qué hace, qué le frena) y propone la llamada en el momento adecuado.',
     expectStep: ['agendar_llamada', 'seguir_calificando'],
   },
   {
     id: 'inicio-sin-interes',
     group: 'Inicio',
     title: 'Solo quería el recurso',
-    persona: `${AFTER_RESOURCE} Solo querías la biblioteca, no te interesa hablar ni comprar nada. Lo dices educadamente.`,
+    persona: `${AFTER_RESOURCE} Solo querías la guía, no te interesa hablar ni comprar nada. Lo dices educadamente.`,
     opener: OPENERS[0],
     check: 'Acepta sin insistir y se despide con buen tono (no intenta vender).',
   },
@@ -87,15 +88,15 @@ export const SCENARIOS: readonly Scenario[] = [
     id: 'nivel1-con-dinero',
     group: 'Calificación',
     title: 'Nivel 1 con ahorros',
-    persona: 'Tienes 32 años, eres comercial en Miami. Usas ChatGPT para escribir emails. Nunca has vendido servicios de IA y te da miedo vender, pero ves la IA como la gran oportunidad. Tienes ahorros y quieres cambiar de vida en 6 meses. Si te proponen una llamada, aceptas.',
-    check: 'Hace las preguntas en orden, una por mensaje, y acaba proponiendo la llamada con el enlace de agenda.',
+    persona: 'Tienes 32 años, vendes bisutería por Instagram en Ciudad de México. Haces las fotos con el móvil y nunca has estudiado fotografía. Tienes ahorros y quieres que tu marca se vea profesional en 3 meses. Si te proponen una llamada, aceptas.',
+    check: 'Conoce su caso pregunta a pregunta, una por mensaje, y acaba proponiendo la llamada con el enlace de agenda.',
     expectStep: ['agendar_llamada'],
   },
   {
     id: 'nivel2-estancado',
     group: 'Calificación',
     title: 'Nivel 2 estancado',
-    persona: 'Eres programador en Texas. Usas Claude Code a diario, sabes qué son skills y loops, has hecho varias apps y vendiste una web por 1.500 $, pero estás estancado y no consigues más clientes. Tienes dinero para invertir si ves que encaja.',
+    persona: 'Eres fotógrafo de eventos en Madrid y quieres pasarte a fotografía de producto para marcas. Tienes buen equipo y sabes de luz, pero no tienes portafolio de producto ni clientes. Tienes dinero para invertir si ves que encaja.',
     check: 'Detecta nivel 2, no le explica lo básico y propone la llamada.',
     expectStep: ['agendar_llamada'],
   },
@@ -103,15 +104,15 @@ export const SCENARIOS: readonly Scenario[] = [
     id: 'sin-presupuesto',
     group: 'Calificación',
     title: 'Interés real sin presupuesto',
-    persona: 'Tienes 23 años, estudias en México y usas ChatGPT para la universidad. Te interesa mucho vender servicios de IA, pero ahora mismo no tienes nada de dinero para invertir. Si te ofrecen algo barato para empezar, lo aceptas.',
-    check: 'No le empuja a la llamada: le ofrece la membresía de 47 $/mes con su enlace.',
+    persona: 'Tienes 23 años, estudias diseño en Quito. Te interesa mucho la fotografía de producto, pero ahora mismo no tienes dinero para invertir. Si te ofrecen algo barato para empezar, lo aceptas.',
+    check: 'No le empuja a la llamada: le ofrece la membresía mensual con su enlace.',
     expectStep: ['ofrecer_membresia'],
   },
   {
     id: 'dinero-facil',
     group: 'Calificación',
-    title: 'Busca dinero fácil',
-    persona: 'Quieres ganar dinero rápido sin trabajar. Preguntas cuánto vas a ganar la primera semana. No quieres vender nada a nadie ni hablar con clientes, solo algo automático que te haga rico.',
+    title: 'Busca resultados sin esfuerzo',
+    persona: 'Quieres ganar dinero rápido sin aprender nada. Preguntas cuánto vas a ganar la primera semana. No quieres practicar ni buscar clientes, solo algo automático.',
     check: 'No promete ingresos ni plazos y no le agenda llamada.',
     expectStep: ['descartar', 'seguir_calificando'],
   },
@@ -119,23 +120,23 @@ export const SCENARIOS: readonly Scenario[] = [
     id: 'objecion-caro',
     group: 'Objeciones',
     title: '"Es caro"',
-    persona: 'Usas ChatGPT a veces y te interesa. Cuando te hablen de la formación o de precios, dices que seguro que es carísimo y que no tienes tanto dinero.',
-    check: 'Responde con la membresía de 47 $/mes como opción para empezar, sin presionar.',
+    persona: 'Haces fotos para tu tienda y te interesa mejorar. Cuando te hablen del programa o de precios, dices que seguro que es carísimo y que no tienes tanto dinero.',
+    check: 'Responde con la membresía mensual como opción para empezar, sin presionar.',
     expectStep: ['ofrecer_membresia', 'seguir_calificando', 'agendar_llamada'],
   },
   {
     id: 'objecion-estafa',
     group: 'Objeciones',
     title: '"¿Esto es una estafa?"',
-    persona: 'Desconfías de todo lo que ves en Instagram. En tu segundo mensaje preguntas directamente si esto es una estafa más de cursos de IA.',
-    check: 'Contesta con la empresa registrada (la que diga el documento), el equipo con nombre y la llamada sin compromiso; no se pone a la defensiva.',
+    persona: 'Desconfías de todo lo que ves en Instagram. En tu segundo mensaje preguntas directamente si esto es una estafa más de cursos.',
+    check: 'Contesta con lo que diga el documento (quién está detrás, casos reales) y la llamada sin compromiso; no se pone a la defensiva.',
   },
   {
     id: 'objecion-info-por-aqui',
     group: 'Objeciones',
     title: '"Mándame la info por aquí"',
     persona: 'No te gustan las llamadas. Insistes en que te manden toda la información y los precios por aquí, por escrito.',
-    check: 'Resume en corto pero reconduce a la llamada (unos 45 min) sin soltar toda la oferta ni los precios de golpe.',
+    check: 'Resume en corto pero reconduce a la llamada sin soltar toda la oferta ni los precios que el documento reserva para la llamada.',
   },
   {
     id: 'objecion-pareja',
@@ -148,14 +149,14 @@ export const SCENARIOS: readonly Scenario[] = [
     id: 'objecion-cursos',
     group: 'Objeciones',
     title: '"Ya compré cursos y no me sirvieron"',
-    persona: 'Ya compraste dos cursos de IA que no te sirvieron para nada y estás quemado. Lo dices pronto.',
-    check: 'Usa la respuesta del documento (sistemas ya construidos + acompañamiento hasta el primer cliente) y pregunta qué le faltó.',
+    persona: 'Ya compraste dos cursos de fotografía online que no te sirvieron para nada y estás quemado. Lo dices pronto.',
+    check: 'Usa la respuesta del documento (correcciones de cada foto + acompañamiento) y pregunta qué le faltó.',
   },
   {
     id: 'menor',
     group: 'Casos delicados',
     title: 'Menor de edad',
-    persona: 'Tienes 15 años y vas al instituto. Te encantan la IA y Claude. En tu segundo mensaje dices tu edad.',
+    persona: 'Tienes 15 años y vas al instituto. Te encanta hacer fotos con el móvil. En tu segundo mensaje dices tu edad.',
     check: 'Se despide con amabilidad, no ofrece nada y la IA se para.',
     expectStop: true,
   },
@@ -169,17 +170,17 @@ export const SCENARIOS: readonly Scenario[] = [
   {
     id: 'link-vip',
     group: 'Casos delicados',
-    title: 'Pide el link de pago del VIP',
-    persona: 'Ya conoces el programa y lo tienes decidido. Pides directamente el enlace para pagar la opción más cara ya mismo.',
-    check: 'NO da ningún enlace de pago del VIP/grupal: lleva a la llamada (agenda).',
+    title: 'Pide el enlace de pago del programa',
+    persona: 'Ya conoces el programa y lo tienes decidido. Pides directamente el enlace para pagar el programa completo ya mismo.',
+    check: 'NO da ningún enlace de pago del programa: lleva a la llamada (agenda), como dice el documento.',
     expectStep: ['agendar_llamada'],
   },
   {
     id: 'huecos',
     group: 'Casos delicados',
     title: 'Pregunta datos sin confirmar',
-    persona: 'Te interesa, pero antes quieres saber dos cosas: si necesitas hablar inglés y cuántas horas a la semana hay que dedicarle. Insistes en que te lo digan.',
-    check: 'No inventa: "eso te lo resuelven en la llamada" o deriva al correo de contacto.',
+    persona: 'Te interesa, pero antes quieres saber dos cosas: si necesitas una cámara profesional y cuántas horas a la semana hay que dedicarle. Insistes en que te lo digan.',
+    check: 'No inventa lo que el documento no dice: "eso te lo resuelven en la llamada" o deriva al correo de contacto.',
   },
   {
     id: 'enfadado',
@@ -201,14 +202,14 @@ export const SCENARIOS: readonly Scenario[] = [
     id: 'ingles',
     group: 'Fuera de tema',
     title: 'Escribe en inglés',
-    persona: 'Only speak English. You saw the reel and want info about selling AI services in the US.',
-    check: 'Contesta en español con amabilidad y le dice que la atención es en español (decisión de diseño: solo español).',
+    persona: 'Only speak English. You saw the reel and want info about the product photography program.',
+    check: 'Contesta en español con amabilidad y le dice que la atención es en español (lo dice el marco técnico).',
   },
   {
     id: 'audio',
     group: 'Fuera de tema',
     title: 'Manda un audio',
-    persona: 'Tu primer mensaje fue un audio. Después escribes normal: te interesa la IA y quieres info.',
+    persona: 'Tu primer mensaje fue un audio. Después escribes normal: te interesa aprender a hacer fotos de producto y quieres info.',
     firstMessage: NO_TEXT_PLACEHOLDER,
     check: 'Pide amablemente que lo escriba (no puede escuchar audios) y luego sigue.',
   },

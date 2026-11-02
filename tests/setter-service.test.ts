@@ -319,12 +319,12 @@ describe('SetterService', () => {
     });
   });
 
-  it('un dueño de negocio que quiere implementación (tipo_lead empresa_dfy) queda con la etiqueta "EMPRESA DFY"', async () => {
+  it('un negocio que quiere que se lo hagan (tipo_lead empresa) queda con la etiqueta "EMPRESA"', async () => {
     const { store, decide, service, flush } = await setup();
-    decide.mockResolvedValue(ok(sampleOutput({}, { tipo_lead: 'empresa_dfy' })));
+    decide.mockResolvedValue(ok(sampleOutput({}, { tipo_lead: 'empresa' })));
     await service.onIncoming(dm('tengo una peluquería y quiero IA para las citas', 'm-1'));
     await flush();
-    expect((await store.getContact(STRANGER_ID))?.tags).toContain('EMPRESA DFY');
+    expect((await store.getContact(STRANGER_ID))?.tags).toContain('EMPRESA');
   });
 
   it('si el mensajito era solo el enlace, el botón va con un texto corto', async () => {
@@ -419,7 +419,6 @@ describe('SetterService', () => {
 
   it.each([
     ['un mensajito larguísimo', ['a'.repeat(301)], 'demasiado largo'],
-    ['el precio del VIP', ['el VIP son $4.997 por 6 meses'], 'precio del grupal o del VIP'],
   ])('%s: no sale nada, se retiene y la IA se para', async (_name, bubbles, reason) => {
     const { store, decide, enqueue, service, flush } = await setup();
     decide.mockResolvedValue(ok(sampleOutput({ messages: bubbles })));

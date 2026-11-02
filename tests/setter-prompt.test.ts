@@ -28,7 +28,7 @@ describe('prompt del setter', () => {
     expect(prompt).toContain('contesta siempre en español neutro');
     expect(prompt).toContain('y tutea');
     expect(prompt).not.toContain('en el idioma en que escribe la persona');
-    expect(prompt).toContain('Nunca digas por chat el precio del grupal ni del VIP');
+    expect(prompt).toContain('di por chat solo los precios que el documento permita dar por chat');
     expect(prompt).toContain('Una pregunta que el documento no responde NO es motivo');
     expect(prompt).toContain('Nunca partas una frase');
     expect(prompt).toContain('tú no puedes reservar ni confirmar llamadas');
@@ -37,7 +37,7 @@ describe('prompt del setter', () => {
     expect(prompt).not.toContain('pide expresamente hablar con una persona o con una persona');
   });
 
-  it('pulido 2026-10-17 (simulaciones con la v5): no se presenta, no vende pronto, mensajes cortos, español neutro, empresas DFY', () => {
+  it('pulido 2026-10-17 (simulaciones con la v5): no se presenta, no vende pronto, mensajes cortos, español neutro, empresas', () => {
     const prompt = buildSystemPrompt('DOC', TEST_SETTER_LINKS);
     expect(prompt).not.toContain('Quién eres: el asistente de mensajes');
     expect(prompt).toContain('No te presentes ni digas qué o quién eres si no te lo preguntan');
@@ -46,7 +46,7 @@ describe('prompt del setter', () => {
     expect(prompt).toContain('1 o 2 mensajitos');
     expect(prompt).toContain('No repitas lo que te acaba de decir');
     expect(prompt).toContain('español neutro');
-    expect(prompt).toContain('tipo_lead = "empresa_dfy"');
+    expect(prompt).toContain('tipo_lead = "empresa"');
   });
 
   it('dice cuándo marcar "descartar" (el nivel 2 salió descartado sin motivo en una simulación)', () => {
@@ -57,7 +57,7 @@ describe('prompt del setter', () => {
 
   it('fallos de la simulación del 17-10 (nivel 2 y seco): recurso ≠ programa, membresía, seco, agenda una vez', () => {
     const prompt = buildSystemPrompt('DOC', TEST_SETTER_LINKS);
-    expect(prompt).toContain('El recurso (la biblioteca) que recibió es gratis y NO es el programa');
+    expect(prompt).toContain('ese recurso NO es el producto de pago');
     expect(prompt).toContain('Ofrece la membresía solo a quien tiene interés pero no puede invertir ahora');
     expect(prompt).toContain('Si contesta seco 3 veces seguidas');
     expect(prompt).toContain('Si ya le pasaste la agenda, no la vuelvas a pasar');

@@ -56,7 +56,7 @@ export function LeadPanel({ lead: rawLead, tags = [], fields: customFields = {},
         <>
           <div className="flex flex-wrap gap-1.5">
             {known(lead.nivel) && <Fact icon={Gauge} text={valueLabel(lead.nivel)} />}
-            {known(lead.tipo_lead) && <Fact icon={lead.tipo_lead === 'empresa_dfy' ? Building2 : GraduationCap} text={valueLabel(lead.tipo_lead)} />}
+            {known(lead.tipo_lead) && <Fact icon={lead.tipo_lead === 'empresa' ? Building2 : GraduationCap} text={valueLabel(lead.tipo_lead)} />}
             {invest && <Fact icon={invest.icon} text={invest.text} tone={invest.tone} />}
           </div>
           {known(lead.resumen) && (

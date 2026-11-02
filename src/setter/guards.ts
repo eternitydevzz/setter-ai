@@ -26,8 +26,6 @@ const TLDS = [
 const LINK_PATTERN = new RegExp(`https?://|www\\.|\\b[a-z0-9-]+(\\.[a-z0-9-]+)*\\.(${TLDS.join('|')})\\b`, 'i');
 const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi;
 const PLACEHOLDER_PATTERN = /\[(LINK|CONFIRMAR|COMPLETAR)[^\]]*\]/i;
-/** Precios del grupal (1.997) y del VIP (4.997): decisión de diseño, nunca por chat. */
-const FORBIDDEN_PRICE_PATTERN = /\b[14][.,\s]?997\b/;
 /** Letras de otros alfabetos (cirílico, griego, hebreo, árabe, japonés, chino, coreano): fallo raro del modelo ("te молча"). */
 const FOREIGN_SCRIPT_PATTERN = /[Ͱ-ϿЀ-ӿ֐-׿؀-ۿ぀-ヿ一-鿿가-힯]/;
 
@@ -112,7 +110,6 @@ export function checkReply(text: string, allowed: AllowedContacts): GuardResult 
   if (trimmed.length === 0) reasons.push('Respuesta vacía');
   if (trimmed.length > MAX_REPLY_CHARS) reasons.push(`Respuesta demasiado larga (${trimmed.length} caracteres, máximo ${MAX_REPLY_CHARS})`);
   if (PLACEHOLDER_PATTERN.test(trimmed)) reasons.push('Contiene un hueco sin rellenar del documento');
-  if (FORBIDDEN_PRICE_PATTERN.test(trimmed)) reasons.push('Da el precio del grupal o del VIP (prohibido por chat)');
   if (FOREIGN_SCRIPT_PATTERN.test(trimmed)) reasons.push('Tiene letras de otro alfabeto (fallo del modelo)');
   const rest = stripAllowed(trimmed, allowed);
   const emails = rest.match(EMAIL_PATTERN) ?? [];

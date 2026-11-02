@@ -9,17 +9,16 @@ export const LEAD_FIELD_LABEL: Readonly<Record<string, string>> = {
   puede_invertir: '¿Puede invertir?',
   resumen: 'Resumen',
   objeciones: 'Objeciones',
-  usa_ia: '¿Usa IA?',
-  gano_dinero: '¿Ha ganado dinero con IA?',
-  dedicacion_ubicacion: 'A qué se dedica y desde dónde',
-  objetivo_6_meses: 'Objetivo a 6 meses',
-  vive_en_eeuu: '¿Vive en EE. UU.?',
+  dedicacion: 'A qué se dedica',
+  ubicacion: 'Desde dónde',
+  situacion: 'Situación',
+  objetivo: 'Objetivo',
   es_menor: '¿Menor de edad?',
 };
 
 export const VALUE_LABEL: Readonly<Record<string, string>> = {
-  formacion: 'Formación',
-  empresa_dfy: 'Empresa (DFY)',
+  aprender: 'Quiere aprender',
+  empresa: 'Empresa (hecho para ti)',
   nivel_1: 'Nivel 1',
   nivel_2: 'Nivel 2',
   no_encaja: 'No encaja',

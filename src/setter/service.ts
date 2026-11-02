@@ -318,8 +318,8 @@ export class SetterService {
       return this.stop(igId, `${result.kind === 'refusal' ? 'Claude rechazó responder' : 'Fallo al llamar a Claude'}: ${result.detail}`);
     }
     await store.saveLead(igId, result.output.lead);
-    // Dueño de negocio que quiere implementación (DFY): etiqueta para que el administrador lo identifique (decisión 2026-10-17).
-    if (result.output.lead.tipo_lead === 'empresa_dfy') await store.addContactTags(igId, ['EMPRESA DFY']);
+    // Negocio que quiere que se lo hagan: etiqueta para identificarlo de un vistazo.
+    if (result.output.lead.tipo_lead === 'empresa') await store.addContactTags(igId, ['EMPRESA']);
     await this.deliver(igId, dedupKey, result);
   }
 

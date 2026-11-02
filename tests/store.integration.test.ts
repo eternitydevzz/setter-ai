@@ -445,10 +445,10 @@ describe('createPostgresStore (Postgres real)', () => {
 
   it('Fase 6.3 · contactos: quitar una etiqueta, ver los comentarios de una persona y la ficha en la lista', async () => {
     await store.touchContact('c63', 'contacto63', '6300001');
-    await store.addContactTags('c63', ['cliente', 'EMPRESA DFY']);
+    await store.addContactTags('c63', ['cliente', 'EMPRESA']);
     await store.removeContactTag('c63', 'cliente');
     await store.removeContactTag('c63', 'no-existe');
-    expect((await store.getContact('c63'))?.tags).toEqual(['EMPRESA DFY']);
+    expect((await store.getContact('c63'))?.tags).toEqual(['EMPRESA']);
     await store.recordComment({ commentId: 'c63-a', igId: 'c63', username: 'contacto63', mediaId: '6300001', text: 'primero' });
     await store.recordComment({ commentId: 'c63-b', igId: 'c63', username: 'contacto63', mediaId: '6300002', text: 'segundo' });
     const comments = await store.listPersonComments('c63', 10);

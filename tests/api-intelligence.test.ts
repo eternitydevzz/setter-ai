@@ -47,7 +47,7 @@ async function setup(analyzer: Analyzer | null = fakeAnalyzer()) {
   const store = createMemoryStore();
   const users = createMemoryUserStore();
   await store.touchContact('p1', 'ana', '18000000000000001');
-  await store.saveLead('p1', { tipo_lead: 'empresa_dfy', nivel: 'nivel_1', puede_invertir: 'si', siguiente_paso: 'agendar_llamada' });
+  await store.saveLead('p1', { tipo_lead: 'empresa', nivel: 'nivel_1', puede_invertir: 'si', siguiente_paso: 'agendar_llamada' });
   await store.addMessage({ igId: 'p1', direction: 'in', source: 'user', text: 'Tengo una clínica, ¿cuánto cuesta?', mid: 'm1', status: 'sent', dedupKey: null });
   await store.addMessage({ igId: 'p2', direction: 'in', source: 'user', text: 'ok', mid: 'm2', status: 'sent', dedupKey: null });
   const client = {
@@ -122,6 +122,6 @@ describe('API Inteligencia (Fase 6.6)', () => {
   it('tráfico por reel (sin IA): fichas sumadas por reel de origen, con su título', async () => {
     const { send, admin } = await setup();
     const { reels } = await (await send('GET', '/api/intelligence/traffic', admin)).json();
-    expect(reels).toEqual([expect.objectContaining({ mediaId: '18000000000000001', label: '2026-10-16 · Mi reel', people: 1, withLead: 1, tipo: { empresa_dfy: 1 } })]);
+    expect(reels).toEqual([expect.objectContaining({ mediaId: '18000000000000001', label: '2026-10-16 · Mi reel', people: 1, withLead: 1, tipo: { empresa: 1 } })]);
   });
 });

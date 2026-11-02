@@ -35,10 +35,10 @@ const MAX_RULE_MESSAGES = 3;
 const DRY_MAX_WORDS = 3;
 const DRY_STREAK = 3;
 
-/** La persona habla de precio o de dinero: entonces sí se puede hablar de la membresía (marco técnico: "desde $47 al mes…"). */
+/** La persona habla de precio o de dinero: entonces sí se puede hablar de la membresía (el documento dice cuándo y a quién ofrecerla). */
 const TALKS_ABOUT_MONEY =
-  /membres|\b47\b|barat|econ[oó]mic|\bcaro\b|precio|cu[aá]nto (cuesta|sale|vale|cobr)|no tengo (dinero|plata|presupuesto)|sin (dinero|plata|presupuesto)|poco (dinero|presupuesto)|no me alcanza/i;
-const MENTIONS_MEMBERSHIP = /membres|\$\s?47\b|\b47\s?(\$|d[oó]lares|usd|al mes)/i;
+  /membres|barat|econ[oó]mic|\bcaro\b|precio|cu[aá]nto (cuesta|sale|vale|cobr)|no tengo (dinero|plata|presupuesto)|sin (dinero|plata|presupuesto)|poco (dinero|presupuesto)|no me alcanza/i;
+const MENTIONS_MEMBERSHIP = /membres/i;
 /** Pide la agenda de verdad ("pásame el enlace", "¿dónde reservo?"); nombrarla ("la agenda la miro", "reservo") no cuenta. */
 const ASKS_FOR_AGENDA =
   /(p[aá]s|mand|env[ií]|reenv|dame|d[eé]jame|comparte).{0,25}(enlace|link|agenda|calendario)|d[oó]nde (reservo|agendo|me apunto|est[aá] (el|la))|(no (me )?(abre|funciona|carga|encuentro)).{0,25}(enlace|link|agenda)|(enlace|link) (otra vez|de nuevo)/i;
@@ -70,8 +70,8 @@ export function ruleIssues(messages: readonly string[], ctx: RuleContext): RuleI
   const issues: RuleIssue[] = [];
   const isMembership = (m: string): boolean => m.includes(ctx.links.membership) || MENTIONS_MEMBERSHIP.test(m);
   if (messages.some(isMembership)) {
-    if (ctx.lead.tipo_lead === 'empresa_dfy') {
-      issues.push({ reason: 'Es un negocio que quiere la IA en SU negocio: la membresía es de la formación, no se la menciones', drop: isMembership });
+    if (ctx.lead.tipo_lead === 'empresa') {
+      issues.push({ reason: 'Es un negocio que quiere que se lo hagan: la membresía es para quien quiere aprender, no se la menciones', drop: isMembership });
     } else if (ctx.lead.puede_invertir !== 'no' && !TALKS_ABOUT_MONEY.test(lastUser)) {
       issues.push({
         reason: 'Hablas de la membresía a quien no ha dicho que no puede invertir ni ha preguntado el precio: no la menciones, llévalo a la llamada',
