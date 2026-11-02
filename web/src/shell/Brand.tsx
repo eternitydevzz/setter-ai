@@ -14,7 +14,7 @@ export function Brand() {
       </div>
       <div className="leading-tight">
         <p className="max-w-[170px] truncate font-display text-[15px] font-bold tracking-[-0.01em] text-snow">{name}</p>
-        <p className="label !text-xs !tracking-[1.6px]">Setter IA</p>
+        <p className="label !text-xs !tracking-[1.6px]">{workspace ? 'Setter IA' : 'Instagram con IA'}</p>
       </div>
     </div>
   );
