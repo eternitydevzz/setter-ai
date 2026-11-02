@@ -196,3 +196,42 @@ describe('reparto por espacio', () => {
     await expect(manager.remove('ws_no_existe_0000')).rejects.toThrow('no existe');
   });
 });
+
+describe('avisos de un espacio que no está en marcha (B1: nunca al principal)', () => {
+  function managerWith(start: (ws: Workspace) => Promise<WorkspaceRuntime>, dropDatabase = vi.fn().mockResolvedValue(undefined)) {
+    const principal = fakeRuntime(null);
+    const log = vi.fn();
+    const manager = new WorkspaceManager({
+      registry: memoryRegistry([SOCIO]),
+      principal,
+      dropDatabase,
+      start,
+      provision: vi.fn().mockResolvedValue(undefined),
+      log,
+      subscribe: vi.fn().mockResolvedValue(undefined),
+      principalAccountId: async () => 'cuenta-principal',
+    });
+    return { manager, principal, log };
+  }
+
+  it('si el espacio no arrancó, sus avisos se descartan y se apunta (no van al principal)', async () => {
+    const { manager, principal, log } = managerWith(() => Promise.reject(new Error('su base no responde')));
+    await manager.boot();
+    manager.dispatchWebhook({ entry: [{ id: SOCIO.igUserId, messaging: [] }, { id: 'cuenta-principal', changes: [] }] });
+    expect(principal.processed).toEqual([{ entry: [{ id: 'cuenta-principal', changes: [] }] }]);
+    expect(log).toHaveBeenCalledWith(expect.stringContaining(SOCIO.id));
+  });
+
+  it('mientras se borra un espacio (ya parado, base borrándose), sus avisos no van al principal', async () => {
+    let finishDrop: () => void = () => undefined;
+    const dropDatabase = vi.fn(() => new Promise<void>((resolve) => (finishDrop = resolve)));
+    const { manager, principal } = managerWith(async (ws) => fakeRuntime(ws.id), dropDatabase);
+    await manager.boot();
+    const removing = manager.remove(SOCIO.id);
+    await vi.waitFor(() => expect(dropDatabase).toHaveBeenCalled());
+    manager.dispatchWebhook({ entry: [{ id: SOCIO.igUserId, messaging: [] }] });
+    finishDrop();
+    await removing;
+    expect(principal.processed).toEqual([]);
+  });
+});

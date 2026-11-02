@@ -199,3 +199,12 @@ describe('Sender', () => {
     expect(store.events.some((e) => e.kind === 'error')).toBe(true);
   });
 });
+
+describe('B2: lo que se encola en segundo plano nunca deja un error sin capturar', () => {
+  it('si la base falla al encolar el paso siguiente de una pausa, se apunta el error (el proceso no se cae)', async () => {
+    const { store, sender } = setup();
+    store.claimAction = vi.fn().mockRejectedValue(new Error('la base no responde'));
+    await sender.continueFlow({ flowId: 'flow1', nodeId: 'resource', recipientId: STRANGER_ID, dedupKey: 'pb:x', depth: 1 });
+    await vi.waitFor(() => expect(store.events.some((e) => e.kind === 'error' && JSON.stringify(e.data).includes('la base no responde'))).toBe(true));
+  });
+});

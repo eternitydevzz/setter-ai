@@ -100,7 +100,8 @@ export function normalizeMessages(messages: readonly string[]): string[] {
 
 /** Quita del texto los enlaces y correos permitidos; lo que quede con pinta de enlace o correo está prohibido. */
 function stripAllowed(text: string, allowed: AllowedContacts): string {
-  const all = [...allowed.urls, ...allowed.emails].sort((a, b) => b.length - a.length);
+  // Sin los vacíos: `texto.split('')` separaría el texto letra a letra y ya no se detectaría ningún enlace.
+  const all = [...allowed.urls, ...allowed.emails].filter((item) => item.length > 0).sort((a, b) => b.length - a.length);
   return all.reduce((rest, item) => rest.split(item).join(' '), text);
 }
 

@@ -124,3 +124,16 @@ describe('processInBackground', () => {
     expect(store.events.find((event) => event.kind === 'error')?.data).toEqual({ message: 'BD caída' });
   });
 });
+
+describe('B5: un evento que falla no hace perder los demás del mismo aviso', () => {
+  it('apunta el error del primero y procesa el segundo', async () => {
+    const { deps, store } = setup([]);
+    const original = store.touchContact.bind(store);
+    store.touchContact = vi.fn().mockRejectedValueOnce(new Error('la base falló un momento')).mockImplementation(original);
+    const dm = (sender: string, mid: string) => ({ sender: { id: sender }, recipient: { id: '17841400000000001' }, timestamp: 1760000000000, message: { mid, text: 'hola' } });
+    const payload = { object: 'instagram', entry: [{ id: '17841400000000001', time: 1760000000, messaging: [dm('900000000000001', 'm-1'), dm('900000000000002', 'm-2')] }] };
+    await processWebhook(payload, deps);
+    expect(store.events.some((e) => e.kind === 'error' && JSON.stringify(e.data).includes('la base falló un momento'))).toBe(true);
+    expect(store.events.some((e) => e.kind === 'message' && JSON.stringify(e.data).includes('m-2'))).toBe(true);
+  });
+});

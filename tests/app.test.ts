@@ -79,13 +79,21 @@ describe('webhook', () => {
     expect((await app.request('/webhooks/instagram?hub.mode=subscribe&hub.verify_token=malo&hub.challenge=1')).status).toBe(403);
   });
 
-  it('POST con firma válida se procesa; con firma falsa no', async () => {
+  it('POST con firma válida se procesa; con firma falsa no, y NO se guarda (B4: nadie llena la base)', async () => {
     const { app, store, processPayload } = setup();
     expect((await app.request(signedPost(JSON.stringify(commentPayload())))).status).toBe(200);
     expect(processPayload).toHaveBeenCalledTimes(1);
     expect((await app.request(signedPost('{}', 'falso'))).status).toBe(403);
     expect(processPayload).toHaveBeenCalledTimes(1);
-    expect(store.requests.map((r) => r.signatureOk)).toEqual([true, false]);
+    expect(store.requests.map((r) => r.signatureOk)).toEqual([true]);
+  });
+
+  it('un cuerpo de más de 1 MB se rechaza (413) sin guardarlo ni procesarlo (B4)', async () => {
+    const { app, store, processPayload } = setup();
+    const huge = JSON.stringify({ relleno: 'x'.repeat(1_100_000) });
+    expect((await app.request(signedPost(huge))).status).toBe(413);
+    expect(store.requests).toEqual([]);
+    expect(processPayload).not.toHaveBeenCalled();
   });
 
   it('JSON roto con firma válida no rompe el servidor', async () => {

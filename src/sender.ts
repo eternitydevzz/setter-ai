@@ -143,6 +143,16 @@ export class Sender {
     await Promise.all(runs);
   }
 
+  /**
+   * Encola sin esperar (al vencer una pausa o desde dentro de la propia cola). Si falla (p. ej. la base no responde),
+   * se apunta en el registro: un error sin capturar pararía todo el servidor.
+   */
+  enqueueInBackground(actions: readonly Action[]): void {
+    this.enqueue(actions).catch((error: unknown) =>
+      this.options.store.logEvent('error', 'Fallo encolando acciones en segundo plano.', describeError(error)).catch(() => undefined),
+    );
+  }
+
   /** Retoma acciones reservadas que no llegaron a terminar (p. ej. por un reinicio). */
   async recover(): Promise<number> {
     const pending = (await this.options.store.pendingActions()).filter(isAction);
@@ -156,7 +166,7 @@ export class Sender {
     if (!flow) return { skipped: 'El flujo ya no existe' };
     if (!flow.enabled) return { skipped: 'El flujo está desactivado' };
     const actions = planNode(flow, payload.nodeId, payload.recipientId, payload.dedupKey, payload.depth);
-    void this.enqueue(actions);
+    this.enqueueInBackground(actions);
     return { next: actions.map((action) => action.dedupKey) };
   }
 
@@ -265,7 +275,7 @@ export class Sender {
       if (action.type === 'private_reply' && action.failReply && !policyBlock) {
         // Plan B: el DM no salió (ni como texto) → respuesta pública pidiendo que nos escriban. Una vez por comentario.
         // Se encola detrás (no se espera aquí, para no bloquear la cola dentro de sí misma).
-        void this.enqueue([{ type: 'reply_comment', dedupKey: `reply-fail:${action.commentId}`, commentId: action.commentId, text: action.failReply }]);
+        this.enqueueInBackground([{ type: 'reply_comment', dedupKey: `reply-fail:${action.commentId}`, commentId: action.commentId, text: action.failReply }]);
       }
       if (policyBlock && error instanceof MetaApiError) {
         const until = new Date(this.now().getTime() + PAUSE_MS).toISOString();
@@ -315,7 +325,7 @@ export class Sender {
       now: this.now,
       random: this.random,
     });
-    void this.enqueue(outcome.next);
+    this.enqueueInBackground(outcome.next);
     return { ...outcome.result, next: outcome.next.map((item) => item.dedupKey) };
   }
 
@@ -375,7 +385,7 @@ export class Sender {
     const follow = await client.getFollowStatus(action.recipientId);
     const next = planAfterFollowCheck(flow, action.nodeId, follow.status, action.recipientId, action.dedupKey, action.depth);
     // Se encola detrás (no se espera aquí, para no bloquear la cola dentro de sí misma).
-    void this.enqueue(next);
+    this.enqueueInBackground(next);
     return { follow: follow.status, detail: follow.detail, next: next.map((item) => item.dedupKey) };
   }
 }

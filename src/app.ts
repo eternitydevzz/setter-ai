@@ -1,5 +1,6 @@
 import { Hono, type Context } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
+import { bodyLimit } from 'hono/body-limit';
 import { csrf } from 'hono/csrf';
 import type { Config } from './config.js';
 import { EMPTY_FORM, flowToForm, formToFlow, newFlowId, readForm } from './flows/form.js';
@@ -44,6 +45,8 @@ const HOUR_MS = 60 * 60 * 1000;
 const CONTACTS_ROWS = 200;
 /** Reels recientes que se cargan para poner nombre a los IDs en Contactos (los más antiguos salen por ID). */
 const MEDIA_FOR_STATS = 50;
+/** Los avisos de Meta son JSON de pocos KB: 1 MB es de sobra. */
+const WEBHOOK_MAX_BYTES = 1024 * 1024;
 
 /** Ejemplo que aparece al crear un flujo avanzado: mensaje con botón → mensaje con enlace con etiqueta → pausa → mensaje. */
 const EXAMPLE_JSON_FLOW = {
@@ -133,17 +136,18 @@ function registerWebhook(app: Hono, deps: AppDeps): void {
   });
 
   // Avisos de Meta: se comprueba la firma, se guardan, se responde 200 rápido y se procesan después.
-  app.post('/webhooks/instagram', async (c) => {
+  // Solo se guarda lo que firma Meta (si no, cualquiera llenaría la base) y nada de más de WEBHOOK_MAX_BYTES.
+  const limit = bodyLimit({ maxSize: WEBHOOK_MAX_BYTES, onError: (c) => c.text('Aviso demasiado grande', 413) });
+  app.post('/webhooks/instagram', limit, async (c) => {
     const raw = Buffer.from(await c.req.arrayBuffer());
-    const signatureOk = isValidSignature(raw, c.req.header('x-hub-signature-256'), config.appSecrets);
+    if (!isValidSignature(raw, c.req.header('x-hub-signature-256'), config.appSecrets)) return c.text('Firma no válida', 403);
     let payload: unknown;
     try {
       payload = JSON.parse(raw.toString('utf8'));
     } catch {
       payload = { invalidJson: raw.toString('utf8').slice(0, 1000) };
     }
-    await store.recordRequest(signatureOk, payload);
-    if (!signatureOk) return c.text('Firma no válida', 403);
+    await store.recordRequest(true, payload);
     processPayload(payload);
     return c.text('EVENT_RECEIVED');
   });

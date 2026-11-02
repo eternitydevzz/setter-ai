@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { serve } from '@hono/node-server';
-import { loadConfig } from './config.js';
+import { databaseSslFor, loadConfig } from './config.js';
 import { InstagramConnect } from './instagram-connect.js';
 import { deriveLinkSecret } from './links.js';
 import { InstagramClient } from './meta/client.js';
@@ -20,8 +20,10 @@ const WORKSPACE_DB_CONNECTIONS = 2;
  */
 async function main(): Promise<void> {
   const config = loadConfig();
-  const users = await createPostgresUserStore(config.databaseUrl);
-  const registry = await createPostgresWorkspaceRegistry(config.databaseUrl);
+  // SSL salvo con sslmode=disable en DATABASE_URL (Postgres local).
+  const db = { ssl: databaseSslFor(config.databaseUrl) };
+  const users = await createPostgresUserStore(config.databaseUrl, db);
+  const registry = await createPostgresWorkspaceRegistry(config.databaseUrl, db);
   const anthropic = config.setter.anthropicApiKey ? new Anthropic({ apiKey: config.setter.anthropicApiKey }) : null;
   // Enlaces con seguimiento: necesitan URL pública + clave. Si falta algo, los botones llevan la URL real.
   const linkSecret = config.tokenEncryptionKey ? deriveLinkSecret(config.tokenEncryptionKey) : null;
@@ -45,7 +47,7 @@ async function main(): Promise<void> {
   const principal = await startWorkspaceRuntime({
     config,
     workspaceId: null,
-    store: await createPostgresStore(config.databaseUrl),
+    store: await createPostgresStore(config.databaseUrl, db),
     users,
     anthropic,
     envToken: config.igAccessToken,
@@ -88,7 +90,7 @@ async function main(): Promise<void> {
       startWorkspaceRuntime({
         config,
         workspaceId: workspace.id,
-        store: await createPostgresStore(databaseUrlFor(config.databaseUrl, workspace.id), { maxConnections: WORKSPACE_DB_CONNECTIONS }),
+        store: await createPostgresStore(databaseUrlFor(config.databaseUrl, workspace.id), { ...db, maxConnections: WORKSPACE_DB_CONNECTIONS }),
         users,
         anthropic,
         envToken: null,

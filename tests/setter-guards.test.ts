@@ -61,3 +61,12 @@ describe('checkReply', () => {
     expect(checkReply('a'.repeat(MAX_REPLY_CHARS + 1), allowed).ok).toBe(false);
   });
 });
+
+describe('B6: con enlaces permitidos vacíos (espacio nuevo sin enlaces) el filtro sigue funcionando', () => {
+  it('un enlace o correo no permitido se bloquea igual', () => {
+    const empty = { urls: ['', ''], emails: [''] };
+    expect(checkReply('mira esto https://malicioso.com', empty).ok).toBe(false);
+    expect(checkReply('escríbeme a otro@gmail.com', empty).ok).toBe(false);
+    expect(checkReply('hola, ¿a qué te dedicas?', empty).ok).toBe(true);
+  });
+});

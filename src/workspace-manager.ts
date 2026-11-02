@@ -55,6 +55,8 @@ export class WorkspaceManager {
   async boot(): Promise<void> {
     for (const account of await this.deps.registry.removedIgUsers()) this.removedIgUsers.add(account);
     for (const workspace of await this.deps.registry.list()) {
+      // Se apunta su cuenta aunque no llegue a arrancar: sus avisos nunca deben ir al principal.
+      if (workspace.igUserId) this.byIgUser.set(workspace.igUserId, workspace.id);
       try {
         await this.launch(workspace);
       } catch (error) {
@@ -180,7 +182,12 @@ export class WorkspaceManager {
       const owner = account ? this.byIgUser.get(account) : undefined;
       // Cuenta de un espacio borrado: su aviso no es de nadie (Meta los sigue mandando mientras la app esté en ella).
       if (!owner && account && this.removedIgUsers.has(account)) continue;
-      const runtime = (owner && this.runtimes.get(owner)) || this.deps.principal;
+      const runtime = owner ? this.runtimes.get(owner) : this.deps.principal;
+      // Espacio que no está en marcha (no arrancó, se reinicia o se está borrando): se descarta, nunca al principal.
+      if (!runtime) {
+        this.deps.log(`Aviso de Meta descartado: el espacio ${owner} no está en marcha.`);
+        continue;
+      }
       groups.set(runtime, [...(groups.get(runtime) ?? []), entry]);
     }
     for (const [runtime, entry] of groups) runtime.process({ ...payload, entry });

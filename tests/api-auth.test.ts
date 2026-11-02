@@ -105,3 +105,15 @@ describe('API de acceso (Fase 6.0)', () => {
     expect((await app.request(noOrigin)).status).toBe(403);
   });
 });
+
+describe('B3: el bloqueo de login no se salta cambiando X-Forwarded-For', () => {
+  it('cuenta la IP que añade el proxy (la última), no la que escribe quien llama (la primera)', async () => {
+    const { app } = setup();
+    await app.request(post('/api/setup', ADMIN));
+    for (let i = 0; i < 5; i += 1) {
+      await app.request(post('/api/login', { email: ADMIN.email, password: 'mala-mala-mala' }, { 'x-forwarded-for': `10.0.0.${i}, 1.2.3.4` }));
+    }
+    const res = await app.request(post('/api/login', { email: ADMIN.email, password: ADMIN.password }, { 'x-forwarded-for': '10.0.0.99, 1.2.3.4' }));
+    expect(res.status).toBe(429);
+  });
+});

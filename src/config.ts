@@ -90,6 +90,18 @@ function loadDelays(env: Env): SendDelays {
   return delays;
 }
 
+/**
+ * ¿SSL en la base? Sí, salvo que DATABASE_URL lleve `sslmode=disable` (un Postgres en tu ordenador, que no tiene SSL).
+ * Neon y cualquier base en internet lo necesitan.
+ */
+export function databaseSslFor(databaseUrl: string): boolean {
+  try {
+    return new URL(databaseUrl).searchParams.get('sslmode') !== 'disable';
+  } catch {
+    return true;
+  }
+}
+
 export function loadConfig(env: Env = process.env): Config {
   const missing = REQUIRED.filter((key) => clean(env[key]) === null);
   if (missing.length > 0) {

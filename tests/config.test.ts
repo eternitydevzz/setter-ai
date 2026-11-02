@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadConfig } from '../src/config.js';
+import { databaseSslFor, loadConfig } from '../src/config.js';
 
 const base = {
   DATABASE_URL: 'postgres://u:p@host/db',
@@ -43,5 +43,16 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ ...base, SEND_LIMIT_PUBLIC_PER_HOUR: '-1' })).toThrow('SEND_LIMIT_PUBLIC_PER_HOUR');
     expect(() => loadConfig({ ...base, SEND_DELAY_COMMENT_MIN_MS: '5000', SEND_DELAY_COMMENT_MAX_MS: '1000' })).toThrow('SEND_DELAY_COMMENT_MAX_MS');
     expect(() => loadConfig({ ...base, SEND_DELAY_FOLLOWUP_MIN_MS: '5000', SEND_DELAY_FOLLOWUP_MAX_MS: '1000' })).toThrow('SEND_DELAY_FOLLOWUP_MAX_MS');
+  });
+});
+
+describe('B7: SSL de la base según DATABASE_URL (para poder arrancar en local)', () => {
+  it('por defecto exige SSL (Neon y cualquier base en internet)', () => {
+    expect(databaseSslFor(base.DATABASE_URL)).toBe(true);
+    expect(databaseSslFor('postgres://u:p@host/db?sslmode=require')).toBe(true);
+  });
+
+  it('con sslmode=disable no usa SSL (Postgres en tu ordenador)', () => {
+    expect(databaseSslFor('postgres://postgres@localhost:5432/setter?sslmode=disable')).toBe(false);
   });
 });

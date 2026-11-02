@@ -187,7 +187,9 @@ export async function rescueComments(since: Date, deps: ProcessDeps, now: Date =
       continue;
     }
     await deps.store.logEvent('rescate', `Rescate: ${plan.note}`, { commentId: row.commentId, from: row.fromUsername });
-    void deps.sender.enqueue(plan.actions);
+    deps.sender.enqueue(plan.actions).catch((error: unknown) =>
+      deps.store.logEvent('error', 'Fallo encolando un comentario rescatado.', describeError(error)).catch(() => undefined),
+    );
     queued += 1;
   }
   return { queued, skipped, since: from.toISOString() };
@@ -204,8 +206,13 @@ export async function processWebhook(payload: unknown, deps: ProcessDeps): Promi
     await deps.store.logEvent('vacio', 'Aviso sin eventos reconocibles.', payload);
     return;
   }
+  // Cada evento por separado: si uno falla, se apunta y los demás del mismo aviso siguen (no se pierden).
   for (const event of events) {
-    await handleEvent(event, deps);
+    try {
+      await handleEvent(event, deps);
+    } catch (error) {
+      await deps.store.logEvent('error', `Fallo procesando un evento (${event.kind}); se sigue con los demás.`, describeError(error));
+    }
   }
 }
 

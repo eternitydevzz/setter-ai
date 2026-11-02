@@ -60,8 +60,12 @@ const sameOrigin: MiddlewareHandler = async (c, next) => {
   return c.json({ error: 'Origen no permitido' }, 403);
 };
 
+/**
+ * IP para el límite de intentos. La ÚLTIMA de X-Forwarded-For es la que añade el proxy del hosting (Render); las
+ * anteriores las puede escribir cualquiera, y con ellas se saltaría el bloqueo cambiando la cabecera en cada intento.
+ */
 function clientIp(c: Context): string {
-  return c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'local';
+  return c.req.header('x-forwarded-for')?.split(',').at(-1)?.trim() || 'local';
 }
 
 export const publicUser = (user: User) => ({ id: user.id, email: user.email, name: user.name, role: user.role, mustChangePassword: user.mustChangePassword });
