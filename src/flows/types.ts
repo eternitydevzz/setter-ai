@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { autoEdges, isSending, MAX_TEMPLATE_TEXT, nodeId, nodeSchema, tapEdges, type FlowNode } from './nodes.js';
 
@@ -150,7 +151,6 @@ export const flowSchema = z
   });
 
 export type Flow = z.infer<typeof flowSchema>;
-export type FlowTrigger = Flow['trigger'];
 /** Lo que se puede escribir (los campos con valor por defecto son opcionales). */
 export type FlowInput = z.input<typeof flowSchema>;
 
@@ -167,4 +167,9 @@ export function validateFlow(input: unknown): ValidationResult {
 
 export function findNode(flow: Flow, nodeId: string): FlowNode | undefined {
   return flow.nodes.find((node) => node.id === nodeId);
+}
+
+/** Id corto y aleatorio para un flujo nuevo (8 letras y números). */
+export function newFlowId(): string {
+  return randomBytes(6).toString('base64url').replace(/[^A-Za-z0-9]/g, 'x').slice(0, 8);
 }

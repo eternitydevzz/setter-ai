@@ -28,9 +28,9 @@ export function SetupPage() {
   }
 
   return (
-    <AuthScreen title="Crea tu cuenta de admin" subtitle="Solo se hace una vez. Para comprobar que eres tú, pon la contraseña del panel actual.">
+    <AuthScreen title="Crea tu cuenta de admin" subtitle="Solo se hace una vez. Para comprobar que eres tú, pon la clave ADMIN_PASSWORD que pusiste en el servidor.">
       <form onSubmit={submit} className="space-y-4">
-        <Field label="Contraseña del panel actual">
+        <Field label="Clave ADMIN_PASSWORD del servidor">
           <input className="field" type="password" autoComplete="off" required value={form.setupKey} onChange={(e) => update('setupKey')(e.target.value)} />
         </Field>
         <Field label="Tu nombre">

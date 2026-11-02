@@ -14,7 +14,7 @@ export function OpenerTab({ openers, onSaved }: Props) {
   if (openers.length === 0) {
     return (
       <Section label="Inicio del setter" description="Ningún flujo tiene ahora el paso de inicio del setter.">
-        <Notice tone="info">Se añade desde Flujos (paso 6.5) o desde el panel actual. Cuando exista, aquí podrás cambiar sus textos y la espera.</Notice>
+        <Notice tone="info">Se añade desde Flujos, con el paso «Setter IA». Cuando exista, aquí podrás cambiar sus textos y la espera.</Notice>
       </Section>
     );
   }

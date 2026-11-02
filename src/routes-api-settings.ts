@@ -9,7 +9,7 @@ import { SETTINGS, type Store } from './store.js';
 import type { UserStore } from './users.js';
 
 /**
- * Configuración · Instagram y envíos (Fase 6.7b). Solo admin. Sustituye a /eventos del panel antiguo (sin el rescate:
+ * Configuración · Instagram y envíos (Fase 6.7b). Solo admin (sin rescate de comentarios:
  * decisión de diseño). Los límites por hora solo se ven (se cambian en Render); la pausa del 368 se quita con REANUDAR.
  * El bloqueo largo de envíos se pone/quita con /api/conversations/sends-block (ya existía, Fase 6.2).
  */

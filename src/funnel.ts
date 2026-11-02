@@ -107,3 +107,14 @@ export function fillDays(days: readonly FunnelCounts[]): FunnelCounts[] {
 export function percent(part: number, base: number): number | null {
   return base > 0 ? Math.round((part / base) * 100) : null;
 }
+
+export type MetricsPeriod = 7 | 30 | 'all';
+
+/** ?days=7 o ?days=30; cualquier otra cosa = todo. */
+export function parsePeriod(raw: string | undefined): MetricsPeriod {
+  return raw === '7' ? 7 : raw === '30' ? 30 : 'all';
+}
+
+export function periodStart(period: MetricsPeriod, now: Date = new Date()): Date {
+  return period === 'all' ? new Date(0) : new Date(now.getTime() - period * DAY_MS);
+}

@@ -32,7 +32,7 @@ export interface MetricsResponse {
   readonly agenda: { readonly offered: number; readonly clicked: number };
 }
 
-/** Pasos y sobre qué paso se calcula su % (los mismos que la tabla del panel antiguo, src/pages-metrics.ts). */
+/** Pasos y sobre qué paso se calcula su %. */
 export const STEP: Readonly<Record<StepKey, { readonly title: string; readonly base?: StepKey }>> = {
   commented: { title: 'Comentaron' },
   reached: { title: 'Les llegó el DM', base: 'commented' },

@@ -3,14 +3,13 @@ import type { Hono } from 'hono';
 import { createApp } from './app.js';
 import { catchUpComments } from './catch-up.js';
 import type { Config } from './config.js';
-import { rescuePendingDms } from './flows/dm-rescue.js';
 import type { InstagramConnect } from './instagram-connect.js';
 import type { WorkspacesAdmin } from './routes-api-workspaces.js';
 import type { InstagramConnection } from './workspace-manager.js';
 import { ClaudeAnalyzer } from './intelligence/analyzer.js';
 import { InstagramClient } from './meta/client.js';
 import { TokenManager } from './meta/token.js';
-import { processEvent, processInBackground, rescueComments } from './process.js';
+import { processEvent, processInBackground } from './process.js';
 import { Scheduler } from './scheduler.js';
 import { LOCK_REASON, ensureInitialLock } from './sends-lock.js';
 import { Sender } from './sender.js';
@@ -163,9 +162,7 @@ export async function startWorkspaceRuntime(deps: RuntimeDeps): Promise<Workspac
     tokens,
     linkSecret: linkSigner ? deps.linkSecret : null,
     processPayload: deps.webhookPayload ?? process,
-    rescue: (since) => rescueComments(since, { store, sender: activeSender }),
     replyPending: (igId) => setter.replyNow(igId),
-    rescueDms: () => rescuePendingDms({ store, sender: activeSender }),
     drafts: { approve: (igId) => setter.approveDraft(igId), discard: (igId) => setter.discardDraft(igId) },
     simulator,
     users: scopeUsers(deps.users, workspaceId),

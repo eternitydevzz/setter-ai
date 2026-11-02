@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildFunnel, fillDays, percent, type FunnelPersonRow } from '../src/funnel.js';
+import { buildFunnel, fillDays, parsePeriod, percent, periodStart, type FunnelPersonRow } from '../src/funnel.js';
 
 /** Embudo (Fase 4, paso 1). Decisiones de diseño: tabla por reel + total + por día; quien comenta en 2 reels cuenta en los dos. */
 
@@ -88,5 +88,20 @@ describe('percent', () => {
     expect(percent(2, 3)).toBe(67);
     expect(percent(0, 5)).toBe(0);
     expect(percent(3, 0)).toBeNull();
+  });
+});
+
+describe('periodo', () => {
+  it('?days=7 o 30; lo demás = todo', () => {
+    expect(parsePeriod('7')).toBe(7);
+    expect(parsePeriod('30')).toBe(30);
+    expect(parsePeriod(undefined)).toBe('all');
+    expect(parsePeriod('9999')).toBe('all');
+  });
+
+  it('inicio del periodo', () => {
+    const now = new Date('2026-10-17T00:00:00Z');
+    expect(periodStart(7, now).toISOString()).toBe('2026-10-10T00:00:00.000Z');
+    expect(periodStart('all', now).getTime()).toBe(0);
   });
 });

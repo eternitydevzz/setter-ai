@@ -6,7 +6,6 @@ import type { NewAnalysisRun } from '../src/store-analysis.js';
 import {
   deletionHash,
   SEND_ACTION_TYPES,
-  type ActionRow,
   type CommentRecord,
   type ContactRow,
   type ConversationRow,
@@ -19,13 +18,22 @@ import {
 } from '../src/store.js';
 import type { KnowledgeDocRow } from '../src/store-docs.js';
 
+/** Una acción reservada en el almacén en memoria (como una fila de la tabla actions). */
+interface MemoryAction {
+  createdAt: Date;
+  type: string;
+  dedupKey: string;
+  ok: boolean | null;
+  response: unknown;
+  request: unknown;
+}
+
 /** Base de datos falsa en memoria con el mismo comportamiento que la de Postgres. */
 export function createMemoryStore(): Store & {
   requests: { signatureOk: boolean; payload: unknown }[];
   events: EventRow[];
-  actions: Map<string, ActionRow & { request: unknown }>;
+  actions: Map<string, MemoryAction>;
   settings: Map<string, string | null>;
-  allowed: string[];
   flows: Map<string, Flow>;
   contacts: Map<string, ContactRow>;
   jobs: Map<number, JobRow & { dedupKey: string; status: string; result: unknown }>;
@@ -67,9 +75,8 @@ export function createMemoryStore(): Store & {
   let nextJobId = 1;
   const requests: { signatureOk: boolean; payload: unknown }[] = [];
   const events: EventRow[] = [];
-  const actions = new Map<string, ActionRow & { request: unknown }>();
+  const actions = new Map<string, MemoryAction>();
   const settings = new Map<string, string | null>();
-  const allowed: string[] = [];
   const flows = new Map<string, Flow>();
   const sendTypes = new Set<string>(SEND_ACTION_TYPES);
 
@@ -78,7 +85,6 @@ export function createMemoryStore(): Store & {
     events,
     actions,
     settings,
-    allowed,
     flows,
     contacts,
     jobs,
@@ -134,7 +140,6 @@ export function createMemoryStore(): Store & {
       counts.comments = drop(comments, (c) => c.igId === igId);
       counts.messages = drop(messages, (m) => m.igId === igId);
       counts.lead_history = drop(leadHistory, (h) => h.igId === igId);
-      counts.allowed_senders = drop(allowed, (id) => id === igId);
       counts.contacts = contacts.delete(igId) ? 1 : 0;
       const touched = analysisRuns.filter((run) => JSON.stringify(run.result).includes(quoted));
       touched.forEach((run) => Object.assign(run, { result: scrubPerson(run.result, igId) }));
@@ -288,12 +293,6 @@ export function createMemoryStore(): Store & {
           : { igId, username, tags: [], firstSeen: now, lastSeen: now, sourceMediaId: mediaId, lastMediaId: mediaId },
       );
     },
-    async unansweredCommentEvents(since) {
-      return events
-        .filter((e) => e.kind === 'comment' && e.createdAt >= since)
-        .map((e) => e.data as { commentId?: string })
-        .filter((data) => !actions.has(`private:${data.commentId}`));
-    },
     async recordComment(comment) {
       if (comments.some((c) => c.commentId === comment.commentId)) return;
       comments.push(comment);
@@ -438,20 +437,11 @@ export function createMemoryStore(): Store & {
     async setSetting(key, value) {
       settings.set(key, value);
     },
-    async allowSender(igId) {
-      if (!allowed.includes(igId)) allowed.push(igId);
-    },
-    async listAllowedSenders() {
-      return [...allowed];
-    },
     async recentEvents(limit, kind) {
       return [...events]
         .reverse()
         .filter((event) => !kind || event.kind === kind)
         .slice(0, limit);
-    },
-    async recentActions(limit) {
-      return [...actions.values()].reverse().slice(0, limit);
     },
   };
 }

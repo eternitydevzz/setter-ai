@@ -88,11 +88,7 @@ export class InstagramConnect {
     return `${AUTHORIZE_URL}?${params.toString()}`;
   }
 
-  consumeState(state: string): boolean {
-    return this.takeState(state).valid;
-  }
-
-  /** Como consumeState, y además dice de qué espacio salió el enlace (Fase 7.5c; null = el principal). */
+  /** Gasta el state (vale una vez y 10 minutos) y dice de qué espacio salió el enlace (null = el principal). */
   takeState(state: string): { valid: boolean; workspaceId: string | null } {
     const entry = this.states.get(state);
     this.states.delete(state);

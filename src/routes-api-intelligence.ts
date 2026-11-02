@@ -6,7 +6,7 @@ import { buildAnalysisInput, estimateAnalysisCost } from './intelligence/input.j
 import { reelTraffic } from './intelligence/traffic.js';
 import { verifyFindings } from './intelligence/verify.js';
 import type { MediaLoader } from './media-catalog.js';
-import { parsePeriod, periodStart } from './pages-metrics.js';
+import { parsePeriod, periodStart } from './funnel.js';
 import { requireAdmin, requireUser, type ApiEnv } from './routes-api.js';
 import { estimateCostUsd } from './setter/simulator.js';
 import type { Store } from './store.js';

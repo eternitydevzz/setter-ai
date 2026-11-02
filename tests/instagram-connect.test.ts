@@ -31,9 +31,9 @@ describe('InstagramConnect', () => {
     expect(url.searchParams.get('scope')).toBe('instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments');
     const state = url.searchParams.get('state') ?? '';
     expect(state.length).toBeGreaterThanOrEqual(20);
-    expect(connect.consumeState(state)).toBe(true);
-    expect(connect.consumeState(state)).toBe(false);
-    expect(connect.consumeState('inventado')).toBe(false);
+    expect(connect.takeState(state).valid).toBe(true);
+    expect(connect.takeState(state).valid).toBe(false);
+    expect(connect.takeState('inventado').valid).toBe(false);
   });
 
   it('el state caduca a los 10 minutos', () => {
@@ -41,7 +41,7 @@ describe('InstagramConnect', () => {
     const connect = new InstagramConnect({ appId: 'x', appSecrets: ['s'], redirectUri: 'https://a.b/c', apiVersion: 'v25.0', fetchFn: vi.fn(), now: () => now });
     const state = new URL(connect.authorizeUrl()).searchParams.get('state') ?? '';
     now = 10 * 60 * 1000 + 1;
-    expect(connect.consumeState(state)).toBe(false);
+    expect(connect.takeState(state).valid).toBe(false);
   });
 
   it('código → token corto → token de 60 días → usuario; si la primera clave no vale, prueba la segunda (sin decir cuál es)', async () => {

@@ -56,8 +56,7 @@ describe('createPostgresStore (Postgres real)', () => {
     await store.finishAction('reply:c1', true, { id: 'r' });
     // Cuenta reply + private (no "once", no los fallidos).
     expect(await store.countSendsSince(before)).toBe(2);
-    const actions = await store.recentActions(10);
-    expect(actions.find((a) => a.dedupKey === 'reply:c1')).toMatchObject({ ok: true, response: { id: 'r' } });
+    expect(await store.getAction('reply:c1')).toMatchObject({ ok: true, response: { id: 'r' } });
   });
 
   it('settings: guardar, sobrescribir y borrar (null)', async () => {
@@ -98,16 +97,6 @@ describe('createPostgresStore (Postgres real)', () => {
     expect(stats.find((s) => s.mediaId === '2222222')).toMatchObject({ comments: 1, people: 1, tagged: {} });
   });
 
-  it('comentarios sin respuesta privada (para el rescate)', async () => {
-    const since = new Date(Date.now() - 60_000);
-    await store.logEvent('comment', 'sin flujo', { kind: 'comment', commentId: 'r1', fromId: '1', accountId: '0' });
-    await store.logEvent('comment', 'sin flujo', { kind: 'comment', commentId: 'r2', fromId: '2', accountId: '0' });
-    await store.logEvent('postback', 'otra cosa', { kind: 'postback' });
-    await store.claimAction('private:r2', 'private_reply', {});
-    const pending = (await store.unansweredCommentEvents(since)) as { commentId: string }[];
-    expect(pending.map((e) => e.commentId)).toEqual(['r1']);
-  });
-
   it('pausas programadas: guardar, no duplicar, coger una sola vez y terminar', async () => {
     const runAt = new Date('2026-10-16T12:02:00.000Z');
     const id = await store.scheduleJob('job:a', runAt, { flowId: 'f', nodeId: 'n', recipientId: '1', dedupKey: 'a', depth: 1 });
@@ -121,13 +110,10 @@ describe('createPostgresStore (Postgres real)', () => {
     expect(await store.pendingJobs()).toEqual([]);
   });
 
-  it('eventos, peticiones y remitentes', async () => {
+  it('eventos y peticiones', async () => {
     await store.recordRequest(true, { object: 'instagram' });
     await store.logEvent('comment', 'nota', { text: 'hola 👋' });
     expect((await store.recentEvents(5))[0]).toMatchObject({ kind: 'comment', note: 'nota', data: { text: 'hola 👋' } });
-    await store.allowSender('9');
-    await store.allowSender('9');
-    expect(await store.listAllowedSenders()).toEqual(['9']);
   });
 
   it('Fase 3 · mensajes: no duplica por mid, cambia estado y mid por clave, y lista en orden', async () => {

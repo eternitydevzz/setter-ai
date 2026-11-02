@@ -6,7 +6,6 @@ import { SessionProvider, useSession } from './auth/SessionContext';
 import { ToastProvider } from './ui/Toast';
 import { SetupPage } from './auth/SetupPage';
 import { HomePage } from './pages/HomePage';
-import { PendingModule } from './pages/PendingModule';
 import { SetterPage } from './setter/SetterPage';
 import { ConversationsPage } from './conversations/ConversationsPage';
 import { ContactDetailPage } from './contacts/ContactDetailPage';
@@ -21,7 +20,6 @@ import { SettingsPage } from './settings/SettingsPage';
 // El constructor visual (React Flow) pesa: se descarga solo cuando se abre un flujo.
 const FlowEditorPage = lazy(() => import('./flows/FlowEditorPage').then((m) => ({ default: m.FlowEditorPage })));
 import { AppShell } from './shell/AppShell';
-import { navFor } from './shell/nav';
 
 /** Pantalla de carga como la de la referencia: "Bienvenido" con una línea dorada. */
 function Splash({ error }: { error: string | null }) {
@@ -49,7 +47,6 @@ function Screens() {
   if (needsSetup) return <SetupPage />;
   if (!user) return <LoginPage />;
   if (user.mustChangePassword) return <ForcedPasswordPage />;
-  const pending = navFor(user.role).filter((item) => item.step !== null);
   return (
     <Routes>
       <Route element={<AppShell />}>
@@ -75,9 +72,6 @@ function Screens() {
             }
           />
         )}
-        {pending.map((item) => (
-          <Route key={item.path} path={item.path.slice(1)} element={<PendingModule item={item} />} />
-        ))}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

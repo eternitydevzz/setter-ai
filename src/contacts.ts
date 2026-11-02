@@ -56,7 +56,7 @@ export function filterContacts(items: readonly ContactItem[], filters: ContactFi
   );
 }
 
-/** "2026-10-16 · principio del texto del reel" (como en el panel antiguo); sin datos del reel, su id. */
+/** "2026-10-16 · principio del texto del reel"; sin datos del reel, su id. */
 export function reelLabel(media: Media | undefined, fallbackId = ''): string {
   if (!media) return fallbackId;
   return `${media.timestamp?.slice(0, 10) ?? ''} · ${(media.caption ?? '').slice(0, REEL_LABEL_CHARS).trim()}`;

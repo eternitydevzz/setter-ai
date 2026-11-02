@@ -4,8 +4,7 @@ import { createApp } from '../src/app.js';
 import type { Config } from '../src/config.js';
 import type { InstagramClient } from '../src/meta/client.js';
 import { TokenManager } from '../src/meta/token.js';
-import { SETTINGS } from '../src/store.js';
-import { TEST_MEDIA_ID, TEST_SETTER_CONFIG, commentPayload, createMemoryStore, followFlow } from './helpers.js';
+import { TEST_SETTER_CONFIG, commentPayload, createMemoryStore } from './helpers.js';
 
 const config: Config = {
   port: 3000,
@@ -22,9 +21,7 @@ const config: Config = {
   setter: TEST_SETTER_CONFIG,
 };
 
-const auth = `Basic ${Buffer.from(`admin:${config.adminPassword}`).toString('base64')}`;
 const HOST = 'http://localhost';
-const media = [{ id: TEST_MEDIA_ID, caption: 'Cómo crear tu primer agente', permalink: 'https://instagram.com/p/1', timestamp: '2026-10-11T00:00:00+0000', mediaProductType: 'FEED' }];
 
 function setup(client: InstagramClient | null = null) {
   const store = createMemoryStore();
@@ -42,34 +39,6 @@ function signedPost(body: string, secret = 'secreto-ig') {
     body,
   });
 }
-
-function formPost(path: string, fields: Record<string, string | string[]>, headers: Record<string, string> = {}) {
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(fields)) for (const item of Array.isArray(value) ? value : [value]) params.append(key, item);
-  return new Request(`${HOST}${path}`, {
-    method: 'POST',
-    headers: { authorization: auth, origin: HOST, 'content-type': 'application/x-www-form-urlencoded', ...headers },
-    body: params.toString(),
-  });
-}
-
-const validForm = {
-  name: 'Reel n8n',
-  enabled: 'on',
-  oncePerUser: 'on',
-  mediaIds: [TEST_MEDIA_ID],
-  keywords: '',
-  publicReplies: '¡Te escribí!\n¡Mira tu DM!',
-  testUsernames: 'tester_ig',
-  mode: 'follow',
-  startText: 'Hola',
-  startButtonTitle: 'Lo quiero',
-  resourceText: 'Aquí lo tienes',
-  resourceButtonTitle: 'Abrir',
-  resourceUrl: 'https://example.com/r',
-  notFollowingText: 'Sígueme',
-  retryButtonTitle: 'Ya te sigo',
-};
 
 describe('webhook', () => {
   it('verificación GET: challenge con el token correcto, 403 si no', async () => {
@@ -109,93 +78,3 @@ describe('páginas públicas', () => {
   });
 });
 
-describe('panel', () => {
-  it('pide contraseña en /eventos y /flujos', async () => {
-    const { app } = setup();
-    expect((await app.request('/eventos')).status).toBe(401);
-    expect((await app.request('/flujos')).status).toBe(401);
-  });
-
-  it('estado: escapa el contenido de Instagram y muestra pausa y límites', async () => {
-    const { app, store } = setup();
-    await store.logEvent('comment', 'nota', { text: '<script>alert(1)</script>' });
-    store.settings.set(SETTINGS.pausedUntil, new Date(Date.now() + 3600_000).toISOString());
-    const html = await (await app.request('/eventos', { headers: { authorization: auth } })).text();
-    expect(html).not.toContain('<script>alert(1)</script>');
-    expect(html).toContain('PAUSADO');
-    expect(html).toContain('/700');
-  });
-
-  it('reanudar quita la pausa; suscribir sin token avisa', async () => {
-    const { app, store } = setup();
-    store.settings.set(SETTINGS.pausedUntil, new Date(Date.now() + 3600_000).toISOString());
-    await app.request(formPost('/eventos/reanudar', {}));
-    expect(store.settings.get(SETTINGS.pausedUntil)).toBeNull();
-    const res = await app.request(formPost('/eventos/suscribir', {}));
-    expect(decodeURIComponent(res.headers.get('location') ?? '')).toContain('Falta el token');
-    const renew = await app.request(formPost('/eventos/renovar-token', {}));
-    expect(decodeURIComponent(renew.headers.get('location') ?? '')).toContain('TOKEN_ENCRYPTION_KEY');
-  });
-
-  it('muestra la cuenta cuando hay cliente', async () => {
-    const client = { getAccount: vi.fn().mockResolvedValue({ userId: '178', username: 'cuenta_principal' }) } as unknown as InstagramClient;
-    const html = await (await setup(client).app.request('/eventos', { headers: { authorization: auth } })).text();
-    expect(html).toContain('@cuenta_principal');
-  });
-
-  it('bloquea formularios enviados desde otra web (CSRF)', async () => {
-    const { app, store } = setup();
-    const res = await app.request(formPost('/eventos/reanudar', {}, { origin: 'https://malicioso.com' }));
-    expect(res.status).toBe(403);
-    expect(store.events).toHaveLength(0);
-  });
-});
-
-describe('flujos en el panel', () => {
-  const client = { listMedia: vi.fn().mockResolvedValue(media) } as unknown as InstagramClient;
-
-  it('formulario de nuevo flujo muestra los reels', async () => {
-    const html = await (await setup(client).app.request('/flujos/nuevo', { headers: { authorization: auth } })).text();
-    expect(html).toContain('Cómo crear tu primer agente');
-  });
-
-  it('crear → aparece en la lista; editar → se guarda con el mismo id', async () => {
-    const { app, store } = setup(client);
-    const res = await app.request(formPost('/flujos/nuevo', validForm));
-    expect(res.status).toBe(303);
-    const [flow] = await store.listFlows();
-    expect(flow).toMatchObject({ name: 'Reel n8n', enabled: true, testUsernames: ['tester_ig'] });
-    const list = await (await app.request('/flujos', { headers: { authorization: auth } })).text();
-    expect(list).toContain('PRUEBA: solo tester_ig');
-    await app.request(formPost(`/flujos/${flow?.id}`, { ...validForm, name: 'Renombrado' }));
-    expect((await store.listFlows()).map((f) => [f.id, f.name])).toEqual([[flow?.id, 'Renombrado']]);
-    const edit = await (await app.request(`/flujos/${flow?.id}`, { headers: { authorization: auth } })).text();
-    expect(edit).toContain('formato de nodos');
-  });
-
-  it('formulario con errores → 400 y no guarda', async () => {
-    const { app, store } = setup(client);
-    const res = await app.request(formPost('/flujos/nuevo', { ...validForm, resourceUrl: 'no-url' }));
-    expect(res.status).toBe(400);
-    expect(await res.text()).toContain('Revisa esto');
-    expect(store.flows.size).toBe(0);
-  });
-
-  it('activar/desactivar y borrar', async () => {
-    const { app, store } = setup(client);
-    store.flows.set('flow1', followFlow());
-    await app.request(formPost('/flujos/flow1/activar', { enabled: 'false' }));
-    expect(store.flows.get('flow1')?.enabled).toBe(false);
-    await app.request(formPost('/flujos/flow1/borrar', {}));
-    expect(store.flows.size).toBe(0);
-    const missing = await app.request(formPost('/flujos/nada/borrar', {}));
-    expect(decodeURIComponent(missing.headers.get('location') ?? '')).toContain('no existe');
-  });
-
-  it('flujos del constructor se muestran solo en lectura', async () => {
-    const { app, store } = setup(client);
-    store.flows.set('flow1', followFlow({ template: 'builder' }));
-    const html = await (await app.request('/flujos/flow1', { headers: { authorization: auth } })).text();
-    expect(html).toContain('constructor visual');
-  });
-});

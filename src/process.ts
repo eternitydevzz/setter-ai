@@ -150,51 +150,6 @@ async function claimOnce(plan: Plan, store: Store, commentId: string | null): Pr
   return false;
 }
 
-/** Meta permite la respuesta privada hasta 7 días después del comentario. Margen de 1 hora. */
-const RESCUE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000 - 60 * 60 * 1000;
-
-type CommentEvent = Extract<InstagramEvent, { kind: 'comment' }>;
-
-function isCommentEvent(value: unknown): value is CommentEvent {
-  const v = value as Partial<CommentEvent> | null;
-  return !!v && v.kind === 'comment' && typeof v.commentId === 'string' && typeof v.fromId === 'string' && typeof v.accountId === 'string';
-}
-
-export interface RescueResult {
-  readonly queued: number;
-  readonly skipped: number;
-  readonly since: string;
-}
-
-/**
- * Rescate: a los comentarios desde `since` que no recibieron respuesta privada, se les aplica el flujo
- * que corresponda ahora (respuesta pública + DM), con la cola y las protecciones anti-ban de siempre.
- */
-export async function rescueComments(since: Date, deps: ProcessDeps, now: Date = new Date()): Promise<RescueResult> {
-  const oldest = new Date(now.getTime() - RESCUE_MAX_AGE_MS);
-  const from = since < oldest ? oldest : since;
-  const [rows, flows] = await Promise.all([deps.store.unansweredCommentEvents(from), deps.store.listFlows()]);
-  let queued = 0;
-  let skipped = 0;
-  for (const row of rows) {
-    if (!isCommentEvent(row)) {
-      skipped += 1;
-      continue;
-    }
-    const plan = planComment(flows, row, deps.random);
-    if (plan.actions.length === 0 || !(await claimOnce(plan, deps.store, row.commentId))) {
-      skipped += 1;
-      continue;
-    }
-    await deps.store.logEvent('rescate', `Rescate: ${plan.note}`, { commentId: row.commentId, from: row.fromUsername });
-    deps.sender.enqueue(plan.actions).catch((error: unknown) =>
-      deps.store.logEvent('error', 'Fallo encolando un comentario rescatado.', describeError(error)).catch(() => undefined),
-    );
-    queued += 1;
-  }
-  return { queued, skipped, since: from.toISOString() };
-}
-
 /** Procesa un evento suelto (p. ej. un comentario recuperado tras un reinicio) igual que si viniera en un aviso de Meta. */
 export async function processEvent(event: InstagramEvent, deps: ProcessDeps): Promise<void> {
   await handleEvent(event, deps);

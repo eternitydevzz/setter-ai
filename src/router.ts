@@ -9,7 +9,7 @@ import type { WorkspaceManager } from './workspace-manager.js';
  * decide a cuál va cada petición:
  *  - /api/*: al espacio de quien ha iniciado sesión (sin sesión, al principal: login, alta, sesión…).
  *  - /l/<enlace>: al espacio que envió el enlace (va dentro, firmado); los enlaces antiguos, al principal.
- *  - Todo lo demás (la web, /webhook, el panel antiguo, la vuelta de Conectar Instagram): al principal. Los avisos
+ *  - Todo lo demás (la web, /webhook, las páginas legales, la vuelta de Conectar Instagram): al principal. Los avisos
  *    de Meta los reparte después el gestor por cuenta de Instagram (dispatchWebhook).
  */
 

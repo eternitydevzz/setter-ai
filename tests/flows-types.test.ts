@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateFlow } from '../src/flows/types.js';
+import { newFlowId, validateFlow } from '../src/flows/types.js';
 import { followFlow } from './helpers.js';
 
 describe('validateFlow', () => {
@@ -40,5 +40,12 @@ describe('validateFlow', () => {
   it('rechaza IDs de reel que no son números y basura', () => {
     expect(validateFlow(followFlow({ trigger: { type: 'comment', mediaIds: ['abc'], keywords: [] } })).ok).toBe(false);
     expect(validateFlow(null).ok).toBe(false);
+  });
+});
+
+describe('newFlowId', () => {
+  it('genera un id de 8 letras y números, distinto cada vez', () => {
+    expect(newFlowId()).toMatch(/^[A-Za-z0-9]{8}$/);
+    expect(newFlowId()).not.toBe(newFlowId());
   });
 });

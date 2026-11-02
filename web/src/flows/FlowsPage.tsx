@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { api } from '../lib/api';
 import { EmptyState, Loading } from '../ui/EmptyState';
-import { Notice, Tabs, blockedUntilText, formatDate } from '../ui/kit';
+import { Notice, Tabs, blockedUntilText } from '../ui/kit';
 import { Page, PageHeader } from '../ui/PageHeader';
 import { ChatEntryPanel } from './ChatEntryPanel';
 import { TRIGGER_LABEL, triggerSummary, type Flow, type FlowsResponse } from './types';

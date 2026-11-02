@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { ApiError, api } from '../lib/api';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { useToast } from '../ui/Toast';
-import { Notice, SecondaryButton, blockedUntilText, formatDate } from '../ui/kit';
+import { Notice, SecondaryButton, blockedUntilText } from '../ui/kit';
 import { FlowCanvas } from './FlowCanvas';
 import { liveWarnings } from './graph';
 import { FlowSettings } from './FlowSettings';

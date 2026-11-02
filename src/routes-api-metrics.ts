@@ -1,8 +1,7 @@
 import { Hono } from 'hono';
 import { reelLabel } from './contacts.js';
-import { buildFunnel, fillDays } from './funnel.js';
+import { buildFunnel, fillDays, parsePeriod, periodStart } from './funnel.js';
 import type { MediaLoader } from './media-catalog.js';
-import { parsePeriod, periodStart } from './pages-metrics.js';
 import { requireUser, type ApiEnv } from './routes-api.js';
 import type { Store } from './store.js';
 import type { UserStore } from './users.js';

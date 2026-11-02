@@ -84,7 +84,7 @@ describe('reparto por espacio', () => {
     expect(await (await get('/api/session')).text()).toBe('espacio:principal');
   });
 
-  it('el resto (web, avisos, panel antiguo) lo atiende el principal', async () => {
+  it('el resto (web, avisos, páginas legales) lo atiende el principal', async () => {
     const { get } = await setup();
     expect(await (await get('/app/flujos', 'tok-socio')).text()).toBe('espacio:principal');
     expect(await (await get('/webhook')).text()).toBe('espacio:principal');
